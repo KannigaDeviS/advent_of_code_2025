@@ -1,18 +1,15 @@
-def count_accessible_rolls(filename="input.txt"):
-    # Read grid from file
+def read_grid(filename="input.txt"):
     with open(filename) as f:
-        grid = [list(line.strip()) for line in f if line.strip()]
+        return [list(line.strip()) for line in f if line.strip()]
 
+def count_accessible(grid):
     rows, cols = len(grid), len(grid[0])
-    accessible_count = 0
-
-    # Directions: 8 neighbors
     directions = [
         (-1, -1), (-1, 0), (-1, 1),
-        (0, -1), (0, 1),
-        (1, -1), (1, 0), (1, 1)
+        (0, -1),          (0, 1),
+        (1, -1),  (1, 0), (1, 1)
     ]
-
+    accessible_positions = []
     for r in range(rows):
         for c in range(cols):
             if grid[r][c] == "@":
@@ -23,11 +20,34 @@ def count_accessible_rolls(filename="input.txt"):
                         if grid[nr][nc] == "@":
                             neighbor_rolls += 1
                 if neighbor_rolls < 4:
-                    accessible_count += 1
+                    accessible_positions.append((r, c))
+    return accessible_positions
 
-    return accessible_count
+def part1(grid):
+    """Return number of accessible rolls in initial grid."""
+    return len(count_accessible(grid))
 
+def part2(grid):
+    """Simulate removal process until no more rolls accessible."""
+    total_removed = 0
+    while True:
+        accessible = count_accessible(grid)
+        if not accessible:
+            break
+        # Remove them
+        for r, c in accessible:
+            grid[r][c] = "."
+        total_removed += len(accessible)
+    return total_removed
 
 if __name__ == "__main__":
-    result = count_accessible_rolls("input.txt")
-    print("Accessible rolls:", result)
+    grid = read_grid("input.txt")
+    # Copy grid for part2 since part2 modifies it
+    import copy
+    grid_copy = copy.deepcopy(grid)
+
+    result1 = part1(grid)
+    result2 = part2(grid_copy)
+
+    print("Part 1 - Accessible rolls initially:", result1)
+    print("Part 2 - Total rolls removed:", result2)
